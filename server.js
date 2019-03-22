@@ -40,23 +40,19 @@ app.engine("handlebars", exphbs({
 }));
 app.set("view engine", "handlebars");
 
-mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/nyscrape", { useNewUrlParser: true }, err=> {
- if(err) {
-   console.log('Error connecting to the database', err);
- } else {
-   console.log('Successfully connected to MongoDB');
- }
+var PORT = process.env.PORT || 3000;
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://heroku_n94x7swh:o4oaj77m56kejunh7r2pbjficf@ds121406.mlab.com:21406/heroku_n94x7swh";
+
+// database configuration
+mongoose.Promise = Promise;
+mongoose.connect(MONGODB_URI);
+
+// check connection status
+var db = mongoose.connection;
+db.on("error", (error) => {
+  console.log(`Connection error ${error}`);
 });
 
-// // Show any mongoose errors
-// db.on("error", function(error) {
-//   console.log("Mongoose Error: ", error);
-// });
-
-// // Once logged in to the db through mongoose, log a success message
-// db.once("open", function() {
-//   console.log("Mongoose connection successful.");
-// });
 
 // Routes
 // ======
