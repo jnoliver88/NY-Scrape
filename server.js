@@ -6,8 +6,8 @@ var mongoose = require("mongoose");
 var path = require("path");
 
 // Requiring Note and Article models
-var Note = require("./models/Note.js");
-var Article = require("./models/Article.js");
+var Note = require("./models/note.js");
+var Article = require("./models/article.js");
 
 // Scraping tools
 var request = require("request");
@@ -76,19 +76,18 @@ app.get("/saved", function(req, res) {
 // A GET request to scrape the echojs website
 app.get("/scrape", function(req, res) {
   // First, we grab the body of the html with request
-  request("https://www.star-telegram.com/", function(error, response, html) {
+  request("https://news.ycombinator.com/", function(error, response, html) {
     // Then, we load that into cheerio and save it to $ for a shorthand selector
     var $ = cheerio.load(html);
-    // Now, we grab every h2 within an article tag, and do the following:
-    $("span.article").each(function(i, element) {
 
+    // Now, we grab every h2 within an article tag, and do the following:
+    $("tr.athing").each(function(i, element) { 
       // Save an empty result object
       var result = {};
 
       // Add the title and summary of every link, and save them as properties of the result object
-      result.title = $(this).children("h2").text();
-      result.summary = $(this).children("li").text();
-      result.link = $(this).children("h2").children("a").attr("href");
+      result.title = $(this).find(".storylink").text();
+      result.link = $(this).find(".storylink").attr("href");
 
       // Using our Article model, create a new entry
       // This effectively passes the result object to the entry (and the title and link)
