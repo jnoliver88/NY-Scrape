@@ -40,23 +40,15 @@ app.engine("handlebars", exphbs({
 }));
 app.set("view engine", "handlebars");
 
+// Connect to the Mongo DB
 mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/nyscrape", { useNewUrlParser: true }, err=> {
- if(err) {
-   console.log('Error connecting to the database', err);
- } else {
-   console.log('Successfully connected to MongoDB');
- }
+if(err) {
+  console.log('Error connecting to the database', err);
+} else {
+  console.log('Successfully connected to MongoDB');
+}
 });
 
-// // Show any mongoose errors
-// db.on("error", function(error) {
-//   console.log("Mongoose Error: ", error);
-// });
-
-// // Once logged in to the db through mongoose, log a success message
-// db.once("open", function() {
-//   console.log("Mongoose connection successful.");
-// });
 
 // Routes
 // ======
@@ -84,18 +76,18 @@ app.get("/saved", function(req, res) {
 // A GET request to scrape the echojs website
 app.get("/scrape", function(req, res) {
   // First, we grab the body of the html with request
-  request("https://www.nytimes.com/", function(error, response, html) {
+  request("https://www.star-telegram.com/", function(error, response, html) {
     // Then, we load that into cheerio and save it to $ for a shorthand selector
     var $ = cheerio.load(html);
     // Now, we grab every h2 within an article tag, and do the following:
-    $("article").each(function(i, element) {
+    $("span.article").each(function(i, element) {
 
       // Save an empty result object
       var result = {};
 
       // Add the title and summary of every link, and save them as properties of the result object
       result.title = $(this).children("h2").text();
-      result.summary = $(this).children(".summary").text();
+      result.summary = $(this).children("li").text();
       result.link = $(this).children("h2").children("a").attr("href");
 
       // Using our Article model, create a new entry
