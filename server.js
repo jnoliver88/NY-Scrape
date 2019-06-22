@@ -6,8 +6,8 @@ var mongoose = require("mongoose");
 var path = require("path");
 
 // Requiring Note and Article models
-var Note = require("./models/Note.js");
-var Article = require("./models/Article.js");
+var Note = require("./models/note.js");
+var Article = require("./models/article.js");
 
 // Scraping tools
 var request = require("request");
@@ -40,17 +40,13 @@ app.engine("handlebars", exphbs({
 }));
 app.set("view engine", "handlebars");
 
-var PORT = process.env.PORT || 3000;
-var MONGODB_URI = process.env.MONGODB_URI || "mongodb://heroku_n94x7swh:o4oaj77m56kejunh7r2pbjficf@ds121406.mlab.com:21406/heroku_n94x7swh";
-
-// database configuration
-mongoose.Promise = Promise;
-mongoose.connect(MONGODB_URI);
-
-// check connection status
-var db = mongoose.connection;
-db.on("error", (error) => {
-  console.log(`Connection error ${error}`);
+// Connect to the Mongo DB
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/nyscrape", { useNewUrlParser: true }, err=> {
+if(err) {
+  console.log('Error connecting to the database', err);
+} else {
+  console.log('Successfully connected to MongoDB');
+}
 });
 
 
@@ -80,19 +76,18 @@ app.get("/saved", function(req, res) {
 // A GET request to scrape the echojs website
 app.get("/scrape", function(req, res) {
   // First, we grab the body of the html with request
-  request("https://www.nytimes.com/", function(error, response, html) {
+  request("https://news.ycombinator.com/", function(error, response, html) {
     // Then, we load that into cheerio and save it to $ for a shorthand selector
     var $ = cheerio.load(html);
-    // Now, we grab every h2 within an article tag, and do the following:
-    $("article").each(function(i, element) {
 
+    // Now, we grab every h2 within an article tag, and do the following:
+    $("tr.athing").each(function(i, element) { 
       // Save an empty result object
       var result = {};
 
       // Add the title and summary of every link, and save them as properties of the result object
-      result.title = $(this).children("h2").text();
-      result.summary = $(this).children(".summary").text();
-      result.link = $(this).children("h2").children("a").attr("href");
+      result.title = $(this).find(".storylink").text();
+      result.link = $(this).find(".storylink").attr("href");
 
       // Using our Article model, create a new entry
       // This effectively passes the result object to the entry (and the title and link)
